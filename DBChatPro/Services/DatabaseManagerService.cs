@@ -35,7 +35,7 @@ namespace DBChatPro
                     return await postgresDb.GenerateSchema(conn);
             }
 
-            return null;
+            return new() { SchemaStructured = new List<TableSchema>(), SchemaRaw = new List<string>() };
         }
     }
 }

@@ -18,7 +18,10 @@ namespace DBChatPro.Services
 
         public async Task<AIQuery> GetAISQLQuery(string aiModel, string aiService, string userPrompt, DatabaseSchema dbSchema, string databaseType)
         {
-            aiClient = CreateChatClient(aiModel, aiService);
+            if (aiClient == null)
+            {
+                aiClient = CreateChatClient(aiModel, aiService);
+            }
 
             List<ChatMessage> chatHistory = new List<ChatMessage>();
             var builder = new StringBuilder();
@@ -42,7 +45,17 @@ namespace DBChatPro.Services
             builder.AppendLine("Always include all of the table columns and details.");
 
             // Build the AI chat/prompts
-            chatHistory.Add(new ChatMessage(ChatRole.User, builder.ToString()));
+            if (string.IsNullOrEmpty(config.GetValue<string>("Ollama_ENDPOINT")))
+            {
+                // Ollama doesn't play well with system prompts and large context windows, so the main prompt can't be a system prompt when Ollama is enabled
+                // This also means we have to disable supplemental chat tab :(
+                chatHistory.Add(new ChatMessage(ChatRole.System, builder.ToString()));
+            }
+            else
+            {
+                chatHistory.Add(new ChatMessage(ChatRole.User, builder.ToString()));
+            }
+            
             chatHistory.Add(new ChatMessage(ChatRole.User, userPrompt));
 
             // Send request to Azure OpenAI model
@@ -78,8 +91,13 @@ namespace DBChatPro.Services
             return null;
         }
 
-        public async Task<ChatCompletion> ChatPrompt(List<ChatMessage> prompt)
+        public async Task<ChatCompletion> ChatPrompt(List<ChatMessage> prompt, string aiModel, string aiService)
         {
+            if (aiClient == null)
+            {
+                aiClient = CreateChatClient(aiModel, aiService);
+            }
+
             return (await aiClient.CompleteAsync(prompt));
         }
     }

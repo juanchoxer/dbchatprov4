@@ -155,46 +155,53 @@
                                 }
                             </MudTreeView>
                         </MudTabPanel>
-                        <MudTabPanel class="chat-drawer" Text="Chat">
-                            <p class="mb-6">Ask the AI model for insights about the query result.</p>
-                            @foreach (var item in ChatHistory)
-                            {
-                                @if (item.Role == ChatRole.User)
+                            <MudTabPanel class="chat-drawer" Text="Chat">
+                        @if (string.IsNullOrEmpty(config.GetValue<string>("Ollama_ENDPOINT")))
+                        {
+                                <p class="mb-6">Ask the AI model for insights about the query result.</p>
+                                @foreach (var item in ChatHistory)
                                 {
+                                    @if (item.Role == ChatRole.User)
+                                    {
 
-                                    <MudCard Class="my-6">
-                                        <MudCardContent>
-                                            <p>You:</p>
-                                            @item.Text
-                                        </MudCardContent>
-                                    </MudCard>
+                                        <MudCard Class="my-6">
+                                            <MudCardContent>
+                                                <p>You:</p>
+                                                @item.Text
+                                            </MudCardContent>
+                                        </MudCard>
+                                    }
+                                    else if (item.Role == ChatRole.Assistant)
+                                    {
+                                        <MudCard Class="my-6">
+                                            <MudCardContent>
+                                                <p>AI Assistant:</p>
+                                                @(new MarkupString(Markdown.ToHtml(item.Text)))
+                                            </MudCardContent>
+                                        </MudCard>
+                                    }
                                 }
-                                else if (item.Role == ChatRole.Assistant)
-                                {
-                                    <MudCard Class="my-6">
-                                        <MudCardContent>
-                                            <p>AI Assistant:</p>
-                                            @(new MarkupString(Markdown.ToHtml(@item.Text)))
-                                        </MudCardContent>
-                                    </MudCard>
-                                }
+                                <EditForm Class="mb-6" Model="FmModel" OnSubmit="() => OnChat()">
+                                    <div>
+                                        <MudTextField @bind-Value="ChatPrompt" T="string" Label="Your prompt" Variant="Variant.Text" Lines="5" />
+                                    </div>
+                                    <div>
+                                        @if (!chatLoading)
+                                        {
+                                            <MudButton Class="my-6" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Color="Color.Primary">Submit</MudButton>
+                                            <MudButton Class="ml-16" Variant="Variant.Filled" ButtonType="ButtonType.Button" OnClick="ClearChat" Color="Color.Primary">Clear</MudButton>
+                                        }
+                                        else
+                                        {
+                                            <MudProgressCircular class="my-6" Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
+                                        }
+                                    </div>
+                                </EditForm>
+                            } 
+                            else
+                            {
+                                <p>Sorry, the nested chat feature isn't available when Ollama is enabled due to context window and system prompt limitations. :(</p>
                             }
-                            <EditForm Class="mb-6" Model="FmModel" OnSubmit="() => OnChat()">
-                                <div>
-                                    <MudTextField @bind-Value="ChatPrompt" T="string" Label="Your prompt" Variant="Variant.Text" Lines="5" />
-                                </div>
-                                <div>
-                                    @if (!chatLoading)
-                                    {
-                                        <MudButton Class="my-6" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Color="Color.Primary">Submit</MudButton>
-                                        <MudButton Class="ml-16" Variant="Variant.Filled" ButtonType="ButtonType.Button" OnClick="ClearChat" Color="Color.Primary">Clear</MudButton>
-                                    }
-                                    else
-                                    {
-                                        <MudProgressCircular class="my-6" Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
-                                    }
-                                </div>
-                            </EditForm>
                         </MudTabPanel>
                         <MudTabPanel Text="History">
                             @if (History.Count > 0)
@@ -349,7 +356,7 @@
         ChatHistory.Add(new ChatMessage(ChatRole.User, ChatPrompt));
         ChatPrompt = "";
 
-        var result = await aiService.ChatPrompt(ChatHistory);
+        var result = await aiService.ChatPrompt(ChatHistory, aiModel, aiPlatform);
 
         ChatHistory.Add(new ChatMessage(ChatRole.Assistant, result.Message.Text));
         chatLoading = false;
@@ -358,7 +365,7 @@
     public void ClearChat()
     {
         ChatHistory.Clear();
-        ChatHistory.Add(new ChatMessage(ChatRole.Assistant, "You are a helpful AI assistant. Provide helpful insights about the following data: " + JsonSerializer.Serialize(RowData)));
+        ChatHistory.Add(new ChatMessage(ChatRole.System, "You are a helpful AI assistant. Provide helpful insights about the following data: " + JsonSerializer.Serialize(RowData)));
     }
 
     public async Task OnSubmit()
@@ -381,7 +388,7 @@
 
             LoadingMessage = "Running the Database query...";
             RowData = await dataService.GetDataTable(ActiveConnection, aiResponse.query);
-            ChatHistory.Add(new ChatMessage(ChatRole.Assistant, "You are a helpful AI assistant. Provide helpful insights about the following data: " + JsonSerializer.Serialize(RowData)));
+            ChatHistory.Add(new ChatMessage(ChatRole.System, "You are a helpful AI assistant. Provide helpful insights about the following data: " + JsonSerializer.Serialize(RowData)));
 
             Loading = false;
             await queryService.SaveQuery(Prompt, ActiveConnection.Name, QueryType.History);
