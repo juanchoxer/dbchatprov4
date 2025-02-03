@@ -51,7 +51,7 @@
                                 Placeholder="Select AI Platform">
                                     @if (!string.IsNullOrEmpty(config.GetValue<string>("AZURE_OPENAI_ENDPOINT")))
                                     {
-                                        <MudSelectItem Value="@("Azure OpenAI")" T="string">Azure OpenAI</MudSelectItem>
+                                        <MudSelectItem Value="@("AzureOpenAI")" T="string">Azure OpenAI</MudSelectItem>
                                     }
                                     @if (!string.IsNullOrEmpty(config.GetValue<string>("OPENAI_KEY")))
                                     {
