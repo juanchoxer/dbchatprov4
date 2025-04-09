@@ -14,7 +14,7 @@ namespace DBChatPro.Services
 
     public class AIService(IConfiguration config)
     {
-        IChatClient aiClient;
+        IChatClient? aiClient;
 
         public async Task<AIQuery> GetAISQLQuery(string aiModel, string aiService, string userPrompt, DatabaseSchema dbSchema, string databaseType)
         {
@@ -27,65 +27,58 @@ namespace DBChatPro.Services
             var builder = new StringBuilder();
             var maxRows = config.GetValue<string>("MAX_ROWS");
 
-            builder.AppendLine("Your are a helpful, cheerful database assistant. Do not respond with any information unrelated to databases or queries. Use the following database schema when creating your answers:");
+            builder.AppendLine("Eres un asistente inteligente de SQL que ayuda a los usuarios a consultar una base de datos de Microsoft SQL Server. Los usuarios describen lo que necesitan en lenguaje natural (español). Tu tarea es generar una consulta SQL (T-SQL) correcta y eficiente en base a la intención del usuario. Usa el siguiente esquema de base de datos:");
 
             foreach(var table in dbSchema.SchemaRaw)
             {
                 builder.AppendLine(table);
             }
 
-            builder.AppendLine("Include column name headers in the query results.");
-            builder.AppendLine("Always provide your answer in the JSON format below:");
-            builder.AppendLine(@"{ ""summary"": ""your-summary"", ""query"":  ""your-query"" }");
-            builder.AppendLine("Output ONLY JSON formatted on a single line. Do not use new line characters.");
-            builder.AppendLine(@"In the preceding JSON response, substitute ""your-query"" with the database query used to retrieve the requested data.");
-            builder.AppendLine(@"In the preceding JSON response, substitute ""your-summary"" with an explanation of each step you took to create this query in a detailed paragraph.");
-            builder.AppendLine($"Only use {databaseType} syntax for database queries.");
-            builder.AppendLine($"Always limit the SQL Query to {maxRows} rows.");
-            builder.AppendLine("Always include all of the table columns and details.");
+            builder.AppendLine("Un cliente puede tener muchas facturas y muchos pagos. Para evitar errores de duplicación de datos (producto cartesiano), no hagas JOIN directo entre múltiples tablas con relaciones uno-a-muchos.");
+            builder.AppendLine("Si necesitas sumar datos de Factura y Pago al mismo tiempo, primero usa subconsultas agregadas (GROUP BY + SUM) y luego haz JOIN con Cliente.");
+            builder.AppendLine("Incluye encabezados de nombres de columnas en los resultados de la consulta.");
+            builder.AppendLine("No inventes columnas ni tablas.Usa únicamente el esquema provisto.");
+            builder.AppendLine("Proporcione siempre tu respuesta en el formato JSON a continuación:");
+            builder.AppendLine(@"{ ""resumen"": ""tu-resumen"", ""query"":  ""tu-query"" }");
+            builder.AppendLine("La salida (output) debe ser solo en formato JSON de una sola línea. No uses caracteres de salto de línea.");
+            builder.AppendLine(@"En la respuesta JSON anterior, sustituye ""tu-query"" con la consulta de base de datos utilizada para recuperar los datos solicitados.");
+            builder.AppendLine(@"En la respuesta JSON anterior, sustituye ""tu-resumen"" con una explicación de cada paso seguido para crear esta consulta en un párrafo detallado.");
+            builder.AppendLine($"Solo usa sintaxis de la base de datos {databaseType}.");
+            builder.AppendLine($"Siempre limita la respuesta SQL a {maxRows} filas utilizando SELECT TOP.");// Recuerda que MSSQL usa TOP en vez de LIMIT.");
+            //builder.AppendLine("Always include all of the table columns and details.");
 
             // Build the AI chat/prompts
-            if (string.IsNullOrEmpty(config.GetValue<string>("Ollama_ENDPOINT")))
-            {
-                // Ollama doesn't play well with system prompts and large context windows, so the main prompt can't be a system prompt when Ollama is enabled
-                // This also means we have to disable supplemental chat tab :(
-                chatHistory.Add(new ChatMessage(ChatRole.System, builder.ToString()));
-            }
-            else
-            {
-                chatHistory.Add(new ChatMessage(ChatRole.User, builder.ToString()));
-            }
-            
+            chatHistory.Add(new ChatMessage(ChatRole.System, builder.ToString()));
             chatHistory.Add(new ChatMessage(ChatRole.User, userPrompt));
 
             // Send request to Azure OpenAI model
-            var response = await aiClient.CompleteAsync(chatHistory);
-            var responseContent = response.Message.Text.Replace("```json", "").Replace("```", "").Replace("\\n", " ");
+            var response = await aiClient!.CompleteAsync(chatHistory);
+            var responseContent = response.Message.Text!.Replace("```json", "").Replace("```", "").Replace("\\n", " ");
 
             try
             {
-                return JsonSerializer.Deserialize<AIQuery>(responseContent);
+                return JsonSerializer.Deserialize<AIQuery>(responseContent)!;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw new Exception("Failed to parse AI response as a SQL Query. The AI response was: " + response.Message.Text);
+                throw new Exception("No se pudo dar el formato correspondiente a la respuesta de la IA. Su respuesta fue: " + response.Message.Text);
             }
         }
 
-        private IChatClient CreateChatClient(string aiModel, string aiService)
+        private IChatClient? CreateChatClient(string aiModel, string aiService)
         {
             switch (aiService)
             {
                 case "AzureOpenAI":
                     return new AzureOpenAIClient(
-                            new Uri(config.GetValue<string>("AZURE_OPENAI_ENDPOINT")),
+                            new Uri(config.GetValue<string>("AZURE_OPENAI_ENDPOINT")!),
                             new DefaultAzureCredential())
                                 .AsChatClient(modelId: aiModel);
                 case "OpenAI":
                         return new OpenAIClient(config.GetValue<string>("OPENAI_KEY"))
                                     .AsChatClient(modelId: aiModel);
                 case "Ollama":
-                        return new OllamaChatClient(config.GetValue<string>("Ollama_ENDPOINT"), aiModel);
+                        return new OllamaChatClient(config.GetValue<string>("Ollama_ENDPOINT")!, aiModel);
             }
 
             return null;
@@ -98,7 +91,7 @@ namespace DBChatPro.Services
                 aiClient = CreateChatClient(aiModel, aiService);
             }
 
-            return (await aiClient.CompleteAsync(prompt));
+            return (await aiClient!.CompleteAsync(prompt));
         }
     }
 }

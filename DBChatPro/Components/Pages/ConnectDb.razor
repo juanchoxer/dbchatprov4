@@ -9,34 +9,32 @@
 @inject IConnectionService connectionService
 
 <div Class="ma-4">
-    <h1>Manage Database Connections</h1>
+    <h1>Conexiones a Bases de Datos</h1>
     <MudDivider />
     <EditForm Model="@aiConnection" OnValidSubmit="OnValidSubmit">
         <DataAnnotationsValidator />
         <MudGrid Class="mt-6">
             <MudItem xs="12" md="6">
-                <h2 Class="mb-6">Add a Connection</h2>
+                <h2 Class="mb-6">Agregar una conexión</h2>
                 <div>
-                    <p>Provide a connection string below to connect to a database and extract the schema. The schema is used by the AI to build queries for your database.</p>
-                    <MudAlert Class="my-6" Severity="Severity.Info">The AI service does NOT have access to the database or data records - it only understands the schema.</MudAlert>
+                    <p>Proporcione una Connection String a continuación para conectarse a una base de datos y extraer el esquema. La IA utiliza el esquema para generar consultas para su base de datos.</p>
+                    <MudAlert Class="my-6" Severity="Severity.Info">El servicio de IA NO tiene acceso a la base de datos ni a los registros de datos: solo conoce el esquema.</MudAlert>
                     @if (!string.IsNullOrEmpty(Error))
                     {
-                        <MudAlert Class="my-6" Severity="Severity.Error">An error occured: @Error</MudAlert>
+                        <MudAlert Class="my-6" Severity="Severity.Error">Ha ocurrido un error: @Error</MudAlert>
                     }
                 </div>
                 <MudCard>
                     <MudCardContent>
                         <MudSelect @bind-Value="aiConnection.DatabaseType"
-                                   Label="Database Type">
+                                   Label="Tipo de Base de Datos">
                             <MudSelectItem Value="@("MSSQL")" T="string">MSSQL</MudSelectItem>
-                            <MudSelectItem Value="@("MYSQL")" T="string">MYSQL</MudSelectItem>
-                            <MudSelectItem Value="@("POSTGRESQL")" T="string">POSTGRESQL</MudSelectItem>
                         </MudSelect>
-                        <MudTextField @bind-Value="aiConnection.Name" T="string" Label="Connection name" Variant="Variant.Text" />
+                        <MudTextField @bind-Value="aiConnection.Name" T="string" Label="Nombre de la conexión" Variant="Variant.Text" />
                         <MudTextField @bind-Value="aiConnection.ConnectionString" T="string" Label="Connection string" Variant="Variant.Text" Lines="5" />
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Check Connection</MudButton>
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Chequear conexión</MudButton>
                     </MudCardActions>
                 </MudCard>
                 @if (dbSchema.SchemaStructured.Count > 0)
@@ -44,8 +42,8 @@
                     <MudCard Class="my-6">
                         <MudCardContent>
                             <p>
-                                The following tables and columns were discovered. Do you want to save this connection?
-                                <MudButton Style="float:right" OnClick="() => SaveConnection()" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Save</MudButton>
+                                Se encontraron las siguientes tablas y columnas. ¿Desea guardar esta conexión?
+                                <MudButton Style="float:right" OnClick="() => SaveConnection()" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Guardar</MudButton>
                             </p>
                             <div Class="my-6">
                                 <MudTreeView T="string">
@@ -65,7 +63,7 @@
                 }
             </MudItem>
             <MudItem xs="12" md="6">
-                <h2 Class="mb-6 ml-6">Existing Connections</h2>
+                <h2 Class="mb-6 ml-6">Conexiones Existentes</h2>
                 @if (ExistingDbs.Count > 0)
                 {
                     <MudPaper MaxWidth="100%" Class="my-6">
@@ -73,11 +71,11 @@
                         <MudList Clickable="false">
                             @foreach (var item in ExistingDbs)
                             {
-                                <MudListItem><span>@item.Name </span><MudIconButton Style="float: right" Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteConnection(item.Name)" Size="Size.Small" Variant="Variant.Filled" Color="Color.Secondary">Delete</MudIconButton></MudListItem>
+                                <MudListItem><span>@item.Name </span><MudIconButton Style="float: right" Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteConnection(item.Name!)" Size="Size.Small" Variant="Variant.Filled" Color="Color.Secondary">Borrar</MudIconButton></MudListItem>
                             }
                             @if(Deleting)
                             {
-                                <p>Deleting... <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true" /></p>
+                                <p>Borrando... <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true" /></p>
                             }
                         </MudList>
                     </MudPaper>
@@ -85,7 +83,7 @@
                 }
                 else
                 {
-                    <p class="ma-6">No queries yet.</p>
+                    <p class="ma-6">No hay conexiones todavía.</p>
                 }
             </MudItem>
         </MudGrid>
@@ -97,8 +95,6 @@
     List<AIConnection> ExistingDbs = new List<AIConnection>();
 
     string Error = String.Empty;
-    bool success;
-    private bool Loading = false;
     private bool Deleting = false;
 
     protected override async Task OnInitializedAsync()
@@ -117,9 +113,7 @@
     {
         try
         {
-            Loading = true;
             dbSchema = await dataService.GenerateSchema(aiConnection);
-            Loading = false;
             Error = String.Empty;
         }
         catch (Exception e)
@@ -140,7 +134,7 @@
             Error = String.Empty;
             
             // Delete operation can take a while with some secure storage so we just update the UI manually
-            var removeEntry = ExistingDbs.FirstOrDefault(x => x.Name == name);
+            var removeEntry = ExistingDbs.First(x => x.Name == name);
             ExistingDbs.Remove(removeEntry);
         }
         catch (Exception e)

@@ -19,7 +19,7 @@
         @if (Connections.Count == 0)
         {
             <MudItem xs="6">
-                <p class="ma-6">You haven't connected a database yet. Visit the <a href="/connect-db">database connection</a> page to setup a connection.</p>
+                <p class="ma-6">No hay ninguna conexión a base de datos. Visita la página de <a href="/connect-db">Conexiones</a> para conectar a una base datos.</p>
             </MudItem>
         }
         else
@@ -27,7 +27,7 @@
             // Main data query area
             <MudItem xs="12">
                 <h1>
-                    Chat with your database
+                    Chatea con tu base de datos
                     <div style="float: right">
                         <MudIconButton OnClick="@(() => ToggleDrawer(Anchor.End))" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
                     </div>
@@ -38,7 +38,7 @@
                         <MudGrid>
                             <MudItem xs="4">
                                 <MudSelect T="string" ValueChanged="LoadDatabase" Value="ActiveConnection.Name"
-                                Label="Select Database">
+                                Label="Base de datos">
                                     @foreach (var db in Connections)
                                     {
                                         <MudSelectItem Value="@db.Name" T="string">@db.Name</MudSelectItem>
@@ -47,8 +47,8 @@
                             </MudItem>
                             <MudItem xs="4">
                                 <MudSelect @bind-Value="aiPlatform"
-                                Label="AI Platform"
-                                Placeholder="Select AI Platform">
+                                Label="Platforma de IA"
+                                Placeholder="Selecciona una plataforma de IA">
                                     @if (!string.IsNullOrEmpty(config.GetValue<string>("AZURE_OPENAI_ENDPOINT")))
                                     {
                                         <MudSelectItem Value="@("AzureOpenAI")" T="string">Azure OpenAI</MudSelectItem>
@@ -64,15 +64,15 @@
                                 </MudSelect>
                             </MudItem>
                             <MudItem xs="4">
-                                <MudTextField Label="AI Model" @bind-Value="aiModel" Placeholder="AI Model or Deployment Name"></MudTextField>
+                                <MudTextField Label="Modelo de IA" @bind-Value="aiModel" Placeholder="Modelo de IA o Nombre de Deploy"></MudTextField>
                             </MudItem>
                         </MudGrid>
                         <EditForm Class="mb-6" Model="FmModel" OnSubmit="() => OnSubmit()">
                             <div>
-                                <MudTextField @bind-Value="FmModel.Prompt" T="string" Label="Your prompt" Variant="Variant.Text" Lines="5" />
+                                <MudTextField @bind-Value="FmModel.Prompt" T="string" Label="Tu consulta" Variant="Variant.Text" Lines="5" />
                             </div>
                             <div>
-                                <MudButton Class="my-6" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Color="Color.Primary">Submit</MudButton>
+                                <MudButton Class="my-6" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Color="Color.Primary">Enviar</MudButton>
                             </div>
                         </EditForm>
                         @if (Loading)
@@ -88,12 +88,12 @@
                     </MudItem>
                 </MudGrid>
                 <MudTabs KeepPanelsAlive="true" Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
-                    <MudTabPanel Text="Results">
+                    <MudTabPanel Text="Resultados">
                         @if (RowData.Count > 0)
                         {
                             <MudTable SortLabel="Sort By" Items="@RowData.Skip(1)" Dense="@dense" Bordered="@bordered" Striped="@striped">
                                 <HeaderContent>
-                                    @foreach (var item in RowData.FirstOrDefault())
+                                    @foreach (var item in RowData.FirstOrDefault()!)
                                     {
                                         <MudTh>@item</MudTh>
                                     }
@@ -109,26 +109,26 @@
                                 </PagerContent>
                             </MudTable>
                             <div class="d-flex flex-wrap mt-4">
-                                <MudSwitch @bind-Checked="@dense" Color="Color.Secondary">Dense</MudSwitch>
-                                <MudSwitch @bind-Checked="@striped" Color="Color.Tertiary">Striped</MudSwitch>
-                                <MudSwitch @bind-Checked="@bordered" Color="Color.Warning">Bordered</MudSwitch>
-                                <MudFab @onclick="SaveFavorite" Style="justify-content: flex-end" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Favorite" Label="Favorite" />
+                                <MudSwitch @bind-Checked="@dense" Color="Color.Secondary">Condensado</MudSwitch>
+                                <MudSwitch @bind-Checked="@striped" Color="Color.Tertiary">Alineado</MudSwitch>
+                                <MudSwitch @bind-Checked="@bordered" Color="Color.Warning">Bordeado</MudSwitch>
+                                <MudFab @onclick="SaveFavorite" Style="justify-content: flex-end" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Favorite" Label="Favorito" />
                             </div>
                         }
                         else
                         {
-                            <p>No data to show.</p>
+                            <p>No hay información para mostrar.</p>
                         }
                     </MudTabPanel>
-                    <MudTabPanel Text="SQL Editor">
+                    <MudTabPanel Text="Editor SQL">
                         <div>
-                            <MudTextField @bind-Value="@Query" Text="@Query" T="string" Label="Edit generated query" Variant="Variant.Text" Lines="5" />
+                            <MudTextField @bind-Value="@Query" Text="@Query" T="string" Label="Editar query generado" Variant="Variant.Text" Lines="5" />
                         </div>
                         <div>
-                            <MudButton @onclick="EditQuery" Class="my-6" Variant="Variant.Filled" Color="Color.Primary">Execute</MudButton>
+                            <MudButton @onclick="EditQuery" Class="my-6" Variant="Variant.Filled" Color="Color.Primary">Ejecutar</MudButton>
                         </div>
                     </MudTabPanel>
-                    <MudTabPanel Text="Insights">
+                    <MudTabPanel Text="Sumario">
                         @if (!string.IsNullOrEmpty(Summary))
                         {
                             <p Class="my-6">@Summary</p>
@@ -141,8 +141,8 @@
             <MudItem xs="4">
                 <MudDrawer Open="@open" Anchor="Anchor.Right" ClipMode="DrawerClipMode.Always" Elevation="1" Breakpoint="Breakpoint.SmAndUp" Width="30%" Variant="@DrawerVariant.Persistent">
                     <MudTabs KeepPanelsAlive="true" Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
-                        <MudTabPanel Text="Schema">
-                            <p class="mb-6">Browse the tables and columns for <b>@ActiveConnection.Name</b></p>
+                        <MudTabPanel Text="Esquema">
+                            <p class="mb-6">Revisa las tablas y columnas de <b>@ActiveConnection.Name</b></p>
                             <MudTreeView T="string">
                                 @foreach (var table in dbSchema.SchemaStructured)
                                 {
@@ -155,10 +155,10 @@
                                 }
                             </MudTreeView>
                         </MudTabPanel>
-                            <MudTabPanel class="chat-drawer" Text="Chat">
-                        @if (string.IsNullOrEmpty(config.GetValue<string>("Ollama_ENDPOINT")))
-                        {
-                                <p class="mb-6">Ask the AI model for insights about the query result.</p>
+                        <MudTabPanel class="chat-drawer" Text="Chat">
+                            @if (string.IsNullOrEmpty(config.GetValue<string>("Ollama_ENDPOINT")))
+                            {
+                                <p class="mb-6">Preguntale a la IA sobre los resultados de tus consultas.</p>
                                 @foreach (var item in ChatHistory)
                                 {
                                     @if (item.Role == ChatRole.User)
@@ -166,7 +166,7 @@
 
                                         <MudCard Class="my-6">
                                             <MudCardContent>
-                                                <p>You:</p>
+                                                <p>Vos:</p>
                                                 @item.Text
                                             </MudCardContent>
                                         </MudCard>
@@ -175,21 +175,21 @@
                                     {
                                         <MudCard Class="my-6">
                                             <MudCardContent>
-                                                <p>AI Assistant:</p>
-                                                @(new MarkupString(Markdown.ToHtml(item.Text)))
+                                                <p>Asistente:</p>
+                                                @(new MarkupString(Markdown.ToHtml(item.Text!)))
                                             </MudCardContent>
                                         </MudCard>
                                     }
                                 }
                                 <EditForm Class="mb-6" Model="FmModel" OnSubmit="() => OnChat()">
                                     <div>
-                                        <MudTextField @bind-Value="ChatPrompt" T="string" Label="Your prompt" Variant="Variant.Text" Lines="5" />
+                                        <MudTextField @bind-Value="ChatPrompt" T="string" Label="Tu consulta" Variant="Variant.Text" Lines="5" />
                                     </div>
                                     <div>
                                         @if (!chatLoading)
                                         {
-                                            <MudButton Class="my-6" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Color="Color.Primary">Submit</MudButton>
-                                            <MudButton Class="ml-16" Variant="Variant.Filled" ButtonType="ButtonType.Button" OnClick="ClearChat" Color="Color.Primary">Clear</MudButton>
+                                            <MudButton Class="my-6" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Color="Color.Primary">Enviar</MudButton>
+                                            <MudButton Class="ml-16" Variant="Variant.Filled" ButtonType="ButtonType.Button" OnClick="ClearChat" Color="Color.Primary">Borrar</MudButton>
                                         }
                                         else
                                         {
@@ -203,7 +203,7 @@
                                 <p>Sorry, the nested chat feature isn't available when Ollama is enabled due to context window and system prompt limitations. :(</p>
                             }
                         </MudTabPanel>
-                        <MudTabPanel Text="History">
+                        <MudTabPanel Text="Historial">
                             @if (History.Count > 0)
                             {
                                 <p class="mb-6">Query history for <b>@ActiveConnection.Name</b></p>
@@ -212,7 +212,7 @@
                                     @foreach (var item in History)
                                     {
                                         <MudList Clickable="true">
-                                            <MudListItem OnClick="() => LoadQuery(item.Query)" Text="@item.Name" />
+                                            <MudListItem OnClick="() => LoadQuery(item.Query!)" Text="@item.Name" />
                                         </MudList>
                                     }
                                 </MudPaper>
@@ -220,19 +220,19 @@
                             }
                             else
                             {
-                                <p class="mb-6">You haven't run any prompts yet.</p>
+                                <p class="mb-6">Todavía no realizaste ninguna consulta.</p>
                             }
                         </MudTabPanel>
-                        <MudTabPanel Text="Favorites">
+                        <MudTabPanel Text="Favoritos">
                             @if (Favorites.Count > 0)
                             {
-                                <p class="mb-6">Your saved queries for <b>@ActiveConnection.Name</b></p>
+                                <p class="mb-6">Tus consultas guardadas para <b>@ActiveConnection.Name</b></p>
                                 <MudPaper>
 
                                     @foreach (var item in Favorites)
                                     {
                                         <MudList Clickable="true">
-                                            <MudListItem OnClick="() => LoadQuery(item.Query)" Text="@item.Name" />
+                                            <MudListItem OnClick="() => LoadQuery(item.Query!)" Text="@item.Name" />
                                         </MudList>
                                     }
                                 </MudPaper>
@@ -240,7 +240,7 @@
                             }
                             else
                             {
-                                <p class="mb-6">You haven't saved any favorites for <b>@ActiveConnection.Name</b> yet.</p>
+                                <p class="mb-6">Todavía no guardaste ninguna consulta para <b>@ActiveConnection.Name</b>.</p>
                             }
                         </MudTabPanel>
                     </MudTabs>
@@ -254,15 +254,14 @@
 @code {
     // Table styling
     private bool dense = false;
-    private bool hover = true;
     private bool striped = true;
     private bool bordered = true;
 
     // Form data
     public FormModel FmModel { get; set; } = new FormModel();
     public string ChatPrompt = "";
-    public string aiModel = "";
-    public string aiPlatform = "";
+    public string aiModel = "gpt-4o-mini";
+    public string aiPlatform = "OpenAI";
     public string activeDatabase = "";
 
     // General UI data
@@ -297,40 +296,49 @@
     protected override async Task OnInitializedAsync()
     {
         Connections = await connectionService.GetAIConnections();
+
         if (Connections.Count > 0)
         {
-            ActiveConnection = Connections.FirstOrDefault();
-            activeDatabase = ActiveConnection.Name;
+            ActiveConnection = Connections.First();
+            activeDatabase = ActiveConnection.Name!;
             dbSchema = await dataService.GenerateSchema(ActiveConnection);
         }
         else
         {
-            ActiveConnection = new AIConnection();
+            var connectionString = config.GetValue<string>("ConnectionString");
+            if (connectionString is not null)
+            {
+                ActiveConnection = new AIConnection() { ConnectionString = connectionString, DatabaseType = "MSSQL", Name = "Principal" };
+                await connectionService.AddConnection(ActiveConnection);
+                activeDatabase = ActiveConnection.Name;
+                dbSchema = await dataService.GenerateSchema(ActiveConnection);
+            }
         }
-        History = await queryService.GetQueries(ActiveConnection.Name, QueryType.History);
-        Favorites = await queryService.GetQueries(ActiveConnection.Name, QueryType.Favorite);
+
+        History = await queryService.GetQueries(ActiveConnection.Name!, QueryType.History);
+        Favorites = await queryService.GetQueries(ActiveConnection.Name!, QueryType.Favorite);
 
     }
 
     private async Task SaveFavorite()
     {
-        await queryService.SaveQuery(FmModel.Prompt, ActiveConnection.Name, QueryType.Favorite);
-        Favorites = await queryService.GetQueries(ActiveConnection.Name, QueryType.Favorite);
-        Snackbar.Add("Saved favorite!", Severity.Success);
+        await queryService.SaveQuery(FmModel.Prompt, ActiveConnection.Name!, QueryType.Favorite);
+        Favorites = await queryService.GetQueries(ActiveConnection.Name!, QueryType.Favorite);
+        Snackbar.Add("Agregado a favoritos", Severity.Success);
     }
 
     private async Task EditQuery()
     {
         RowData = await dataService.GetDataTable(ActiveConnection, Query);
-        Snackbar.Add("Results updated.", Severity.Success);
+        Snackbar.Add("Resultados actualizados.", Severity.Success);
     }
 
     public async Task LoadDatabase(string databaseName)
     {
-        ActiveConnection = (await connectionService.GetAIConnections()).FirstOrDefault(x => x.Name == databaseName);
+        ActiveConnection = (await connectionService.GetAIConnections()).First(x => x.Name == databaseName);
         dbSchema = await dataService.GenerateSchema(ActiveConnection);
-        History = await queryService.GetQueries(ActiveConnection.Name, QueryType.History);
-        Favorites = await queryService.GetQueries(ActiveConnection.Name, QueryType.Favorite);
+        History = await queryService.GetQueries(ActiveConnection.Name!, QueryType.History);
+        Favorites = await queryService.GetQueries(ActiveConnection.Name!, QueryType.Favorite);
         ClearUI();
     }
 
@@ -380,20 +388,20 @@
         {
             Loading = true;
             ChatHistory.Clear();
-            LoadingMessage = "Getting the AI query...";
-            var aiResponse = await aiService.GetAISQLQuery(aiModel, aiPlatform, Prompt, dbSchema, ActiveConnection.DatabaseType);
+            LoadingMessage = "Generando consulta SQL...";
+            var aiResponse = await aiService.GetAISQLQuery(aiModel, aiPlatform, Prompt, dbSchema, ActiveConnection.DatabaseType!);
 
             Query = aiResponse.query;
-            Summary = aiResponse.summary;
+            Summary = aiResponse.resumen;
 
-            LoadingMessage = "Running the Database query...";
+            LoadingMessage = "Ejecutando consulta SQL...";
             RowData = await dataService.GetDataTable(ActiveConnection, aiResponse.query);
-            ChatHistory.Add(new ChatMessage(ChatRole.System, "You are a helpful AI assistant. Provide helpful insights about the following data: " + JsonSerializer.Serialize(RowData)));
+            ChatHistory.Add(new ChatMessage(ChatRole.System, "Eres un asistente de IA útil. Proporciona información útil sobre los siguientes datos: " + JsonSerializer.Serialize(RowData)));
 
             Loading = false;
-            await queryService.SaveQuery(Prompt, ActiveConnection.Name, QueryType.History);
-            History = await queryService.GetQueries(ActiveConnection.Name, QueryType.History);
-            Favorites = await queryService.GetQueries(ActiveConnection.Name, QueryType.Favorite);
+            await queryService.SaveQuery(Prompt, ActiveConnection.Name!, QueryType.History);
+            History = await queryService.GetQueries(ActiveConnection.Name!, QueryType.History);
+            Favorites = await queryService.GetQueries(ActiveConnection.Name!, QueryType.Favorite);
             Error = string.Empty;
         }
         catch (Exception e)

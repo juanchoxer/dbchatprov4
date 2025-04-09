@@ -17,7 +17,6 @@ namespace DBChatPro
                 await connection.OpenAsync();
                 using var reader = await command.ExecuteReaderAsync();
 
-                int count = 0;
                 bool headersAdded = false;
                 if (reader.HasRows){
                     while (await reader.ReadAsync())
@@ -38,7 +37,7 @@ namespace DBChatPro
                         {
                             try
                             {
-                                cols.Add(reader.GetValue(i).ToString());
+                                cols.Add(reader.GetValue(i).ToString()!);
                             }
                             catch
                             {
@@ -74,7 +73,7 @@ namespace DBChatPro
                     {
                         while (await reader.ReadAsync())
                         {
-                            rows.Add(new KeyValuePair<string, string>(reader.GetValue(0).ToString(), reader.GetValue(1).ToString()));
+                            rows.Add(new KeyValuePair<string, string>(reader.GetValue(0).ToString()!, reader.GetValue(1).ToString()!));
                         }
                     }
                 }

@@ -19,7 +19,7 @@ namespace DBChatPro.Services
 
         public async Task DeleteConnection(string name)
         {
-            var connection = connections.FirstOrDefault(x => x.Name == name);
+            var connection = connections.First(x => x.Name == name);
             connections.Remove(connection);
         }
     }

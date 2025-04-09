@@ -20,9 +20,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddScoped<AIService>();
 builder.Services.AddScoped<IDatabaseService, DatabaseManagerService>();
-builder.Services.AddScoped<MySqlDatabaseService>();
 builder.Services.AddScoped<SqlServerDatabaseService>();
-builder.Services.AddScoped<PostgresDatabaseService>();
 
 
 // For Azure OpenAI using Entra ID
@@ -61,9 +59,9 @@ if (builder.Configuration["EnvironmentMode"] == "local")
 // AZURE HOSTED ONLY - currently only supports hosting on Azure with Azure OpenAI, so use Azure services in hosted mode
 else if (builder.Configuration["EnvironmentMode"] == "hosted")
 {
-    var azureOpenAIEndpoint = new Uri(builder.Configuration["AZURE_OPENAI_ENDPOINT"]);
-    var azureTableEndpoint = new Uri(builder.Configuration["AZURE_STORAGE_ENDPOINT"]);
-    var azureKeyVaultEndpoint = new Uri(builder.Configuration["AZURE_KEYVAULT_ENDPOINT"]);
+    var azureOpenAIEndpoint = new Uri(builder.Configuration["AZURE_OPENAI_ENDPOINT"]!);
+    var azureTableEndpoint = new Uri(builder.Configuration["AZURE_STORAGE_ENDPOINT"]!);
+    var azureKeyVaultEndpoint = new Uri(builder.Configuration["AZURE_KEYVAULT_ENDPOINT"]!);
 
     builder.Services.AddAzureClients(async clientBuilder =>
     {

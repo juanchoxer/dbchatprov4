@@ -6,12 +6,12 @@ namespace DBChatPro
     {
         private List<HistoryItem> queries = new();
 
-        public Task<List<HistoryItem>> GetQueries(string connectionName, QueryType queryType)
+        public Task<List<HistoryItem>> GetQueries(string? connectionName, QueryType queryType)
         {
             return Task.FromResult(queries.Where(x => x.QueryType == queryType).ToList());
         }
 
-        public Task SaveQuery(string query, string connectionName, QueryType queryType)
+        public Task SaveQuery(string query, string? connectionName, QueryType queryType)
         {
             queries.Add(new HistoryItem()
             {

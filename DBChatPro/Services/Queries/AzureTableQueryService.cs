@@ -36,7 +36,7 @@ namespace DBChatPro
                 tableName: "queries"
             );
 
-            string category = Enum.GetName(queryType);
+            string category = Enum.GetName(queryType)!;
 
             AsyncPageable<HistoryItem> results = client.QueryAsync<HistoryItem>(
                 product => product.PartitionKey == category

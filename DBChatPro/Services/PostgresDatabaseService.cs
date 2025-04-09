@@ -10,13 +10,12 @@ namespace DBChatPro
         public async Task<List<List<string>>> GetDataTable(AIConnection conn, string sqlQuery)
         {
             var rows = new List<List<string>>();
-            var dataSource = NpgsqlDataSource.Create(conn.ConnectionString);
+            var dataSource = NpgsqlDataSource.Create(conn.ConnectionString!);
 
             await using (var cmd = dataSource.CreateCommand(sqlQuery))
             
             await using (var reader = await cmd.ExecuteReaderAsync())
             {
-                int count = 0;
                 bool headersAdded = false;
                 while (await reader.ReadAsync())
                 {
@@ -36,7 +35,7 @@ namespace DBChatPro
                     {
                         try
                         {
-                            cols.Add(reader.GetValue(i).ToString());
+                            cols.Add(reader.GetValue(i).ToString()!);
                         }
                         catch
                         {
@@ -55,8 +54,8 @@ namespace DBChatPro
             var dbSchema = new DatabaseSchema() { SchemaRaw = new List<string>(), SchemaStructured = new List<TableSchema>() };
             List<KeyValuePair<string, string>> rows = new();
 
-            var pairs = conn.ConnectionString.Split(";");
-            var database = pairs.Where(x => x.Contains("Database")).FirstOrDefault().Split("=").Last();
+            var pairs = conn.ConnectionString!.Split(";");
+            var database = pairs.Where(x => x.Contains("Database")).First().Split("=").Last();
 
             string sqlQuery = $@"SELECT 
                                     table_name, 

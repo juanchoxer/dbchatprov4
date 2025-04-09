@@ -7,7 +7,7 @@
 <MudLayout>
     <MudAppBar Elevation="2">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">DBChatPro 4.0</MudText>
+        <MudText Typo="Typo.h5" Class="ml-3">DBChatPro 4.5</MudText>
         <MudSpacer />
         <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
     </MudAppBar>
@@ -15,8 +15,8 @@
         <NavMenu />
 
         <MudRadioGroup Class="mx-4 mt-12" @bind-Value="_isDarkMode">
-            <MudRadio Value="true" Color="Color.Primary" Dense="false">Dark mode</MudRadio>
-            <MudRadio Value="false" Color="Color.Secondary" Dense="false">Light mode</MudRadio>
+            <MudRadio Value="true" Color="Color.Primary" Dense="false">Tema oscuro</MudRadio>
+            <MudRadio Value="false" Color="Color.Secondary" Dense="false">Tema claro</MudRadio>
         </MudRadioGroup>
     </MudDrawer>
     <MudMainContent>

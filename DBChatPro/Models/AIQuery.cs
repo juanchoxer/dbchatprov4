@@ -2,7 +2,7 @@
 {
     public class AIQuery
     {
-        public string summary { get; set; }
-        public string query { get; set; }
+        public required string resumen { get; set; }
+        public required string query { get; set; }
     }
 }
